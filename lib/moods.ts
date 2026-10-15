@@ -1,4 +1,5 @@
 export const moods = [
+  { id: 'sad', label: 'Feeling low', icon: '☂', genres: '18', words: ['sad', 'down', 'low', 'bad day', 'cry', 'heartbroken'] },
   { id: 'happy', label: 'Feel-good', icon: '☀', genres: '35|10751', words: ['happy', 'joy', 'cheer', 'feel good', 'feel-good', 'uplift', 'sad', 'down', 'bad day'] },
   { id: 'funny', label: 'Need a laugh', icon: '☺', genres: '35', words: ['laugh', 'funny', 'comedy', 'humor', 'bored'] },
   { id: 'romantic', label: 'Romantic', icon: '♡', genres: '10749', words: ['romantic', 'romance', 'love', 'date'] },

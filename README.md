@@ -1,6 +1,6 @@
 # Moodreel
 
-Responsive Next.js App Router movie discovery app, ready for Vercel. Pick one of eight moods or describe a mood to see movie posters, ratings, summaries, and regional streaming/rental options.
+Responsive Next.js App Router movie discovery app, ready for Vercel. Describe your mood, choose how you want to feel, and get a shortlist of three movies that fit your preferences and have watch options in your country.
 
 ## Local setup
 
@@ -19,14 +19,21 @@ Push this repo to GitHub, import it into Vercel, and choose the Next.js preset. 
 
 ## Data and behavior
 
-- Free text uses keyword matching to map moods to movie genres; no paid AI service is needed. Unsupported descriptions ask the user to choose a mood.
+- Nine mood choices and keyword-based free text matching, with separate “match my mood”, “lift my spirits”, and “surprise me” goals. Feeling low maps to drama when matching and comedy/family when uplifting. No paid AI service is needed.
+- Choose original language (including Tamil, Telugu, Hindi, Malayalam, Kannada, and English), maximum runtime, and who is watching. Date night adds comedy/romance; friends adds adventure/comedy/thriller. Family uses animation/family genres. Original language does not indicate available dubbed audio.
+- Subscription choices load dynamically for the selected country. Select none for all services; rentals are excluded by default and must be explicitly enabled. Movies must have a verified matching subscription/rental offer. Filters are verified against each movie's details, not silently relaxed when no matches exist.
+- Maximum age rating uses **US** certification, independently of the streaming country. Family defaults to PG or below. Unrated titles are excluded when a rating limit is set. Family/optional genre exclusions remove horror, war, and crime; these do not screen sensitive scenes. Check a content guide for individual suitability.
+- Show three picks with a genre-based explanation, “Pick for me”, and a shuffle that excludes previously fetched movies in this session. Fewer than three may appear when strict filters limit the available results.
+- Save a watchlist, mark films seen, dismiss unwanted films, and undo feedback in History. Saved and dismissed genres influence the ranking of future candidate pools; this is a lightweight heuristic, not an AI taste model. Seen/dismissed IDs are excluded from discovery.
+- Preferences, watchlist, feedback, and activity counters persist in browser localStorage, with no account or cross-device sync. Each library list is capped at 200 entries. Storage failures show a message and fall back to memory for the visit. Saved watch availability is a snapshot; links open current listings.
+- “Your local activity & privacy” shows searches, shuffles, cumulative saves, watch-option clicks, and automatic picks. These counters are local only; there is no centralized analytics collection. The clear-data button resets stored preferences, lists, and counters.
 - India is the default country. US, UK, Canada, and Australia are also available.
-- TMDB supplies movie information, posters, and JustWatch provider data. Responses are cached for one hour. Results vary across the first three popular result pages.
-- Subscription streaming and rentals are separately labeled. Watch links open the regional TMDB watch-options page. Availability failures and absent providers have distinct messages.
+- TMDB supplies movie information, posters, US certificates, runtimes, and JustWatch provider data. Responses are cached for one hour. Initial results use the first popular page; shuffles vary across the first five pages. Detailed lookups use batches of five, with up to twenty candidates per request.
+- Subscription streaming and rentals are separately labeled. Watch links open the regional TMDB watch-options page. Movies with failed details are omitted; complete lookup failure returns a retry message.
 - Availability changes; confirm pricing and catalog listings with the provider.
 - TMDB is free for noncommercial use with attribution. Review [API terms](https://www.themoviedb.org/api-terms-of-use) before monetizing. TMDB and JustWatch are credited in the interface.
 - Decorative hero posters are CSS artwork; real movie posters load after a successful search.
 
 ## Verification
 
-Run `npm test` for mood resolution, `npm run typecheck` for TypeScript, and `npm run build` for production compilation.
+Run `npm test` for mood resolution, preference validation, discovery filters, eligibility, and ranking. Run `npm run typecheck` for TypeScript and `npm run build` for production compilation. After building, `npm run test:api` starts an isolated production server on port 3097 and verifies the homepage, provider endpoint, strict family/language/runtime/service filters, rentals, exclusions, and invalid/empty cases using deterministic TMDB fixtures. It never uses your real token and shuts down its test server afterward.
