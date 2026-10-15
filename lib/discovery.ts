@@ -5,7 +5,7 @@ export const countries = { IN: 'India' };
 export type Preferences = { region: string; language: string; minutes: string; intent: string; group: string; age: string; gentle: boolean; rentals: boolean; services: number[] };
 export const defaults: Preferences = { region: 'IN', language: 'any', minutes: 'any', intent: 'match', group: 'solo', age: 'any', gentle: false, rentals: false, services: [] };
 export type Provider = { provider_id: number; provider_name: string };
-export type Movie = { id: number; title: string; overview: string; poster_path: string | null; release_date: string; vote_average: number; genre_ids: number[]; original_language: string; runtime: number; certification: string; providers: Provider[]; rent: Provider[]; watchLink: string | null; region: string; reason: string };
+export type Movie = { id: number; title: string; overview: string; poster_path: string | null; release_date: string; vote_average: number; genre_ids: number[]; original_language: string; runtime: number; certification: string; indianCertification?: string; providers: Provider[]; rent: Provider[]; watchLink: string | null; region: string; reason: string };
 export function parsePreferences(params: URLSearchParams): Preferences {
   const value = (name: string, allowed: string[], fallback: string) => { const v = params.get(name) ?? fallback; if (!allowed.includes(v)) throw new Error(`Invalid ${name}.`); return v; };
   const services = params.get('services') ?? '';
@@ -24,7 +24,7 @@ export function genrePlan(input: string, preferences: Preferences, random = Math
   let reason = `${mood.label} mood: a ${mood.label.toLowerCase()} genre match`;
   if (preferences.intent === 'uplift') { genres = '35|10751'; reason = 'A comedy or family pick to lift your spirits'; }
   if (preferences.intent === 'surprise') { const choice = moods[Math.floor(random() * moods.length)]; genres = choice.genres; reason = `A surprise from the ${choice.label.toLowerCase()} shelf`; }
-  if (preferences.group === 'family') { genres = '16|10751'; reason += '; animation or family genres for watching together'; }
+  if (preferences.group === 'family') { genres = '16|10751'; reason = 'Animation or family genres for watching together'; }
   if (preferences.group === 'date') { genres = `${genres},35|10749`; reason += '; comedy or romance for date night'; }
   if (preferences.group === 'friends') { genres = `${genres},12|35|53`; reason += '; adventure, comedy, or suspense for your group'; }
   return { genres, reason, mood: mood.label };

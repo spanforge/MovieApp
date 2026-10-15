@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { discoverParams, eligible, genrePlan, matchesGenres, parsePreferences, type Movie } from '@/lib/discovery';
 import { tmdb } from '@/lib/tmdb';
+export const maxDuration = 60;
 type Rating = { iso_3166_1: string; release_dates: { certification: string }[] };
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams;
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
   catch (error) { return NextResponse.json({ error: (error as Error).message }, { status: 400 }); }
   const excluded = query.get('exclude') ?? '';
   if (excluded && !/^\d+(,\d+){0,499}$/.test(excluded)) return NextResponse.json({ error: 'Invalid excluded movies.' }, { status: 400 });
-  if (!process.env.TMDB_READ_ACCESS_TOKEN) return NextResponse.json({ error: 'Movie discovery needs a TMDB token. Add TMDB_READ_ACCESS_TOKEN to the server environment.' }, { status: 503 });
+  if (!process.env.TMDB_READ_ACCESS_TOKEN) return NextResponse.json({ error: 'Movie search is unavailable right now. Please try again later.' }, { status: 503 });
   try {
     const first = await tmdb(`/discover/movie?${discoverParams(preferences, plan.genres, 1)}`);
     const maxPage = Math.min(first.total_pages ?? 1, 5);
@@ -26,7 +27,9 @@ export async function GET(request: NextRequest) {
           const detail = await tmdb(`/movie/${candidate.id}?append_to_response=watch/providers,release_dates`);
           const local = detail['watch/providers']?.results?.[preferences.region];
           const certification = (detail.release_dates?.results as Rating[] | undefined)?.find(r => r.iso_3166_1 === 'US')?.release_dates.find(r => r.certification)?.certification ?? '';
+          const indianCertification = (detail.release_dates?.results as Rating[] | undefined)?.find(r => r.iso_3166_1 === 'IN')?.release_dates.find(r => r.certification)?.certification ?? '';
           const movie: Movie = { id: detail.id, title: detail.title, overview: detail.overview, poster_path: detail.poster_path, release_date: detail.release_date, vote_average: detail.vote_average, genre_ids: candidate.genre_ids, original_language: detail.original_language, runtime: detail.runtime, certification, providers: local?.flatrate ?? [], rent: local?.rent ?? [], watchLink: local?.link ?? null, region: preferences.region, reason: `${plan.reason}. ${detail.runtime} minutes${preferences.language !== 'any' ? '; matches your original-language preference' : ''}.` };
+          movie.indianCertification = indianCertification;
           return eligible(movie, preferences) && matchesGenres(movie.genre_ids, plan.genres) ? movie : null;
         } catch { failed++; return null; }
       }));

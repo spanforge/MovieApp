@@ -25,7 +25,7 @@ globalThis.fetch = async (input, options) => {
     const f = fixtures.find(f => url.pathname === `/3/movie/${f.id}`);
     if (!f) return Response.json({ error: 'Unknown fixture' }, { status: 404 });
     const availability = { flatrate: f.rentalOnly || f.unavailable ? [] : [providers[0]], rent: f.unavailable ? [] : [providers[1]], link: `https://www.themoviedb.org/movie/${f.id}/watch` };
-    data = { id: f.id, title: `Fixture ${f.id}`, overview: 'Integration test movie', poster_path: '/fixture.jpg', release_date: '2020-01-01', vote_average: 7.5, original_language: f.language, runtime: f.runtime, 'watch/providers': { results: { IN: availability, US: availability } }, release_dates: { results: [{ iso_3166_1: 'US', release_dates: [{ certification: f.rating }] }] } };
+    data = { id: f.id, title: `Fixture ${f.id}`, overview: 'Integration test movie', poster_path: '/fixture.jpg', release_date: '2020-01-01', vote_average: 7.5, original_language: f.language, runtime: f.runtime, 'watch/providers': { results: { IN: availability, US: availability } }, release_dates: { results: [{ iso_3166_1: 'US', release_dates: [{ certification: f.rating }] }, {iso_3166_1:'IN',release_dates:[{certification:'U'}]}] } };
   }
   return Response.json(data);
 };

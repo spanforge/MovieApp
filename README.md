@@ -32,14 +32,40 @@ Push this repo to GitHub, import it into Vercel, and choose the Next.js preset. 
 - Show three picks with a genre-based explanation, “Pick for me”, and a shuffle that excludes previously fetched movies in this session. Fewer than three may appear when strict filters limit the available results.
 - Save a watchlist, mark films seen, dismiss unwanted films, and undo feedback in History. Saved and dismissed genres influence the ranking of future candidate pools; this is a lightweight heuristic, not an AI taste model. Seen/dismissed IDs are excluded from discovery.
 - Preferences, watchlist, feedback, and activity counters persist in browser localStorage, with no account or cross-device sync. Each library list is capped at 200 entries. Storage failures show a message and fall back to memory for the visit. Saved watch availability is a snapshot; links open current listings.
-- “Your local activity & privacy” shows searches, shuffles, cumulative saves, watch-option clicks, and automatic picks. These counters are local only; there is no centralized analytics collection. The clear-data button resets stored preferences, lists, and counters.
+- “Your local activity & privacy” shows searches, shuffles, cumulative saves, watch-option clicks, and automatic picks. These counters are local. Optional usage sharing (off by default) separately sends allowlisted events to server logs. The clear-data button resets stored preferences, lists, and counters.
 - India is the only supported country, enforced by both API endpoints. Regional watch offers and the provider list always use India. Old saved preferences are migrated to India, unsupported languages reset to the Indian/English mix, and old non-India subscription selections are cleared. Previously saved movies outside the supported region/languages are omitted from the current library.
-- TMDB supplies movie information, posters, US certificates, runtimes, and JustWatch provider data. Responses are cached for one hour. Initial results use the first popular page; shuffles vary across the first five pages. Detailed lookups use batches of five, with up to twenty candidates per request.
+- TMDB supplies movie information, posters, Indian and US certificates, runtimes, and JustWatch provider data. Responses are cached for one hour. Initial results use the first popular page; shuffles vary across the first five pages. Detailed lookups use batches of five, with up to twenty candidates per request.
 - Subscription streaming and rentals are separately labeled. Watch links open the regional TMDB watch-options page. Movies with failed details are omitted; complete lookup failure returns a retry message.
 - Availability changes; confirm pricing and catalog listings with the provider.
 - TMDB is free for noncommercial use with attribution. Review [API terms](https://www.themoviedb.org/api-terms-of-use) before monetizing. TMDB and JustWatch are credited in the interface.
-- Decorative hero posters are CSS artwork; real movie posters load after a successful search.
+- Real movie posters load after a successful search. The TMDB attribution logo is bundled locally with source information in `public/ASSETS.md`.
 
 ## Verification
 
 Run `npm test` for mood resolution, preference validation, discovery filters, eligibility, and ranking. Run `npm run typecheck` for TypeScript and `npm run build` for production compilation. After building, `npm run test:api` starts an isolated production server on port 3097 and verifies the homepage, provider endpoint, strict family/language/runtime/service filters, rentals, exclusions, and invalid/empty cases using deterministic TMDB fixtures. It never uses your real token and shuts down its test server afterward.
+
+## Public beta features and operations
+
+- Movie details include Share (native share sheet, clipboard, then a selectable-link fallback), I chose this movie, Yes/No usefulness votes, and a movie-specific problem report. Chosen IDs and votes persist locally; they do not imply that a film was actually watched.
+- Loading placeholders, a retry action, a global error boundary, a missing-page screen, and a language-preserving broaden-search action handle slow, failed, or empty searches. Filters are relaxed only when the visitor chooses that action.
+- Indian certificates are displayed when supplied by TMDB. The age **filter** still uses US certification; both the family selector and privacy page explain this. There is no inferred equivalence between Indian and US ratings.
+- Accessibility improvements include a skip link, visible focus states, labeled controls, native dialog focus containment/Escape close, status messages, focus movement to search results, pressed-state feedback, image alternatives, and reduced-motion support. No browser automation is available in this environment, so a full interactive/screen-reader audit remains unverified.
+- `/privacy` explains local data, optional collection, external services, ratings, and credits. TMDB's approved logo and required disclaimer are included. Attribution does **not** grant a commercial licence: obtain commercial permission from TMDB before monetizing. See https://developer.themoviedb.org/docs/faq.
+
+### Feedback and opt-in activity
+
+`POST /api/feedback` validates topic/message/movie ID and writes a `moodreel_feedback` JSON record with a short reference to **server logs**. The form explicitly says messages are logged and no reply contact is collected. Review these records in Vercel runtime logs (or the local terminal). This is a beta intake channel, not a durable support inbox; log retention and access are controlled by the hosting account. Export logs or connect a persistent sink before relying on long-term retention. No emails are sent automatically.
+
+Optional sharing in Your saved choices & privacy sends `POST /api/events` records with type `moodreel_activity`. Event names: visit, return_visit, search_success, search_failed, shuffle, movie_chosen, watch_options, save, share, recommendation_helpful, recommendation_unhelpful. Only the event name and optional public movie ID are accepted; free-text moods, watchlists, and persistent visitor IDs are excluded. Events are best-effort, not a billing-grade or unique-person metric. Return visits use a local previous-visit time separated by 30 minutes, with no cross-device identity. Do Not Track / Global Privacy Control disable sharing. No external analytics account or paid plan is required. This provides log events, not a dashboard or guaranteed durable analytics storage.
+
+Both intake endpoints check same-origin browser submissions, limit streamed request bodies, validate input, and apply a bounded per-instance in-memory rate limit. This is not a distributed anti-abuse system. Hosting request/security logs may contain network metadata independently of opt-in collection. Security headers disable framing and unneeded device permissions and set nosniff/referrer policies.
+
+### Verify the real deployment
+
+After deploying with the TMDB environment variable, run:
+
+```sh
+node scripts/check-deployment.mjs https://your-app.vercel.app
+```
+
+This checks the deployed homepage, privacy page, attribution asset, live provider list, English recommendations, India watch offers, and a real poster. No token is passed to this script; the deployed server uses its configured secret. A live deployment cannot be verified without its URL. The fixture API checks do not substitute for this test.
