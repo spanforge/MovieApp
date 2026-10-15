@@ -1,7 +1,7 @@
 import { moods, resolveMood } from './moods.ts';
 
-export const languages = { any: 'Any language', ta: 'Tamil', te: 'Telugu', hi: 'Hindi', en: 'English', ml: 'Malayalam', kn: 'Kannada', ko: 'Korean', ja: 'Japanese', fr: 'French', es: 'Spanish' };
-export const countries = { IN: 'India', US: 'United States', GB: 'United Kingdom', CA: 'Canada', AU: 'Australia' };
+export const languages = { any: 'Indian languages & English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', ml: 'Malayalam', kn: 'Kannada', bn: 'Bengali', mr: 'Marathi', pa: 'Punjabi', gu: 'Gujarati', or: 'Odia', as: 'Assamese', ur: 'Urdu', ne: 'Nepali', ks: 'Kashmiri', sd: 'Sindhi', sa: 'Sanskrit', en: 'English' };
+export const countries = { IN: 'India' };
 export type Preferences = { region: string; language: string; minutes: string; intent: string; group: string; age: string; gentle: boolean; rentals: boolean; services: number[] };
 export const defaults: Preferences = { region: 'IN', language: 'any', minutes: 'any', intent: 'match', group: 'solo', age: 'any', gentle: false, rentals: false, services: [] };
 export type Provider = { provider_id: number; provider_name: string };
@@ -30,7 +30,7 @@ export function genrePlan(input: string, preferences: Preferences, random = Math
   return { genres, reason, mood: mood.label };
 }
 export function discoverParams(preferences: Preferences, genres: string, page: number) {
-  const params = new URLSearchParams({ with_genres: genres, include_adult: 'false', 'vote_count.gte': '50', 'vote_average.gte': '6', sort_by: 'popularity.desc', watch_region: preferences.region, with_watch_monetization_types: preferences.rentals ? 'flatrate|rent' : 'flatrate', page: String(page), 'with_runtime.gte': '1', 'primary_release_date.lte': new Date().toISOString().slice(0,10) });
+  const params = new URLSearchParams({ with_genres: genres, include_adult: 'false', 'vote_count.gte': '50', 'vote_average.gte': '6', sort_by: 'popularity.desc', watch_region: 'IN', with_watch_monetization_types: preferences.rentals ? 'flatrate|rent' : 'flatrate', page: String(page), 'with_runtime.gte': '1', 'primary_release_date.lte': new Date().toISOString().slice(0,10) });
   if (preferences.language !== 'any') params.set('with_original_language', preferences.language);
   if (preferences.minutes !== 'any') params.set('with_runtime.lte', preferences.minutes);
   if (preferences.services.length) params.set('with_watch_providers', preferences.services.join('|'));
@@ -40,6 +40,7 @@ export function discoverParams(preferences: Preferences, genres: string, page: n
   return params;
 }
 export function eligible(movie: Movie, preferences: Preferences) {
+  if (movie.region !== 'IN' || movie.original_language === 'any' || !Object.hasOwn(languages, movie.original_language)) return false;
   if (!movie.runtime || (preferences.minutes !== 'any' && movie.runtime > Number(preferences.minutes))) return false;
   if (preferences.language !== 'any' && movie.original_language !== preferences.language) return false;
   if (preferences.group === 'family' && !movie.genre_ids.some(id => [16,10751].includes(id))) return false;

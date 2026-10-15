@@ -5,8 +5,17 @@ import { defaults, discoverParams, eligible, genrePlan, matchesGenres, parsePref
 const movie: Movie = { id: 1, title: 'A movie', overview: '', poster_path: null, release_date: '2020-01-01', vote_average: 7, genre_ids: [35], original_language: 'ta', runtime: 90, certification: 'PG', providers: [{ provider_id: 8, provider_name: 'Netflix' }], rent: [{ provider_id: 9, provider_name: 'Rental' }], watchLink: null, region: 'IN', reason: '' };
 test('validate user filters and reject invalid upstream parameters', () => {
   assert.deepEqual(parsePreferences(new URLSearchParams()), defaults);
-  for (const query of ['region=XX','language=bad','minutes=-1','age=NC-17','services=8|9','group=unknown','intent=unknown']) assert.throws(() => parsePreferences(new URLSearchParams(query)));
+  for (const query of ['region=XX','region=US','region=GB','language=ko','language=ja','language=fr','language=bad','minutes=-1','age=NC-17','services=8|9','group=unknown','intent=unknown']) assert.throws(() => parsePreferences(new URLSearchParams(query)));
   assert.deepEqual(parsePreferences(new URLSearchParams('services=8,8,9')).services, [8,9]);
+});
+test('all-language discovery excludes other languages and non-India availability', () => {
+  for (const language of ['hi','ta','te','ml','kn','bn','mr','pa','gu','or','as','ur','ne','ks','sd','sa','en']) {
+    assert.equal(eligible({...movie,original_language:language},defaults),true);
+    assert.equal(parsePreferences(new URLSearchParams(`language=${language}`)).language,language);
+  }
+  for (const language of ['ko','ja','fr','es','any','unknown']) assert.equal(eligible({...movie,original_language:language},defaults),false);
+  assert.equal(eligible({...movie,region:'US'},defaults),false);
+  assert.equal(discoverParams({...defaults,region:'US'},'35',1).get('watch_region'),'IN');
 });
 test('separate a sad mood from an uplifting desired feeling', () => {
   assert.equal(genrePlan('sad', defaults).genres, '18');

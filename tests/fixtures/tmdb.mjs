@@ -11,6 +11,8 @@ const fixtures = [
   { id: 8, runtime: 85, language: 'ta', rating: 'PG', unavailable: true },
   { id: 9, runtime: 85, language: 'ta', rating: 'PG-13' },
   { id: 10, runtime: 70, language: 'ta', rating: 'G' },
+  { id: 11, runtime: 85, language: 'ko', rating: 'PG' },
+  { id: 12, runtime: 85, language: 'en', rating: 'PG' },
 ];
 const providers = [{ provider_id: 8, provider_name: 'Test subscription' }, { provider_id: 9, provider_name: 'Test rentals' }];
 globalThis.fetch = async (input, options) => {
