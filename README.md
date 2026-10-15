@@ -2,6 +2,12 @@
 
 Responsive Next.js App Router movie discovery app, ready for Vercel. Describe your mood, choose how you want to feel, and get a shortlist of three movies that fit your preferences and have watch options in your country.
 
+## Simple interface
+
+The main screen offers six mood buttons and one “Find a movie” action. More moods and free-text descriptions are optional. Language, streaming apps, runtime, viewing group, and other preferences are inside “Make it yours”; saved filters stay visible in a short summary and can be reset. Streaming apps load only when this section opens, with a search box to find an app quickly.
+
+Movie cards show the title, language, length, and where to watch, with a Save button. Plot, recommendation explanation, age rating, and seen/not-for-me feedback are under “About this movie.” Feedback has an immediate Undo action. Seen/hidden history and local activity remain available under “Your saved choices & privacy.”
+
 ## Local setup
 
 Requires Node.js 20.9 or newer.

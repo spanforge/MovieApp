@@ -16,7 +16,7 @@ try {
   async function get(path) { const response = await fetch(`http://localhost:${port}${path}`); return {status:response.status,data:await response.json()}; }
   const home = await fetch(`http://localhost:${port}`);
   assert.equal(home.status,200);
-  assert.match(await home.text(),/Find my three picks/);
+  assert.match(await home.text(),/Find a movie/);
   const providerResult = await get('/api/providers?region=IN');
   assert.equal(providerResult.status,200); assert.equal(providerResult.data.providers.length,2);
   assert.equal((await get('/api/providers?region=XX')).status,400);
